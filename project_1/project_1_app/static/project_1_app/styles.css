@@ -1,0 +1,65 @@
+body {
+    background-color: #111; /* mroczne tło */
+    color: #eee;
+    font-family: 'Courier New', Courier, monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    height: 100vh;
+    justify-content: center;
+  }
+  
+  /* Timer i wynik */
+  #timer, #score {
+    font-size: 2.5rem;
+    margin: 15px;
+    text-shadow: 0 0 8px #0ff, 0 0 20px #0ff; /* neonowy błysk */
+  }
+  
+  /* Grid z kwadratami */
+  #grid {
+    display: grid;
+    grid-template-columns: repeat(5, 120px);
+    grid-template-rows: repeat(5, 120px);
+    gap: 7px;
+    user-select: none;
+    margin-top: 20px;
+  }
+  
+  /* Każda komórka */
+  .cell {
+    width: 80px;
+    height: 80px;
+    background-color: #222;
+    border: 2px solid #444;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: inset 0 0 5px #000;
+  }
+  
+  /* Aktywny kwadrat - świeci na biało z neonem */
+  .cell.active {
+    background-color: #0ff;
+    box-shadow: 0 0 15px #0ff, 0 0 30px #0ff;
+  }
+  
+  /* Efekt hover */
+  .cell:hover {
+    border-color: #0ff;
+    box-shadow: 0 0 10px #0ff;
+  }
+  
+  /* Tekst game over */
+  #gameover {
+    font-size: 3rem;
+    color: #f00;
+    margin-top: 25px;
+    text-shadow: 0 0 10px #f00;
+  }
+  
+  /* Ukryj formularz (jeśli jeszcze nie usunięte z html) */
+  #scoreForm {
+    display: none;
+  }

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8" />
+    <title>Pong dla dwóch użytkowników</title>
+    <style>
+        canvas {
+            background: black;
+            display: block;
+            margin: 20px auto;
+            border: 2px solid white;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="pong" width="600" height="400"></canvas>
+
+    <script>
+        const canvas = document.getElementById('pong');
+        const ctx = canvas.getContext('2d');
+
+        const paddleWidth = 10;
+        const paddleHeight = 80;
+        let leftPaddleY = 160;
+        let rightPaddleY = 160;
+        const paddleSpeed = 5;
+
+        let ballX = canvas.width / 2;
+        let ballY = canvas.height / 2;
+        let ballRadius = 8;
+        let ballSpeedX = 3;
+        let ballSpeedY = 3;
+
+        const keys = {};
+
+        document.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+        });
+
+        document.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+        });
+
+        // WebSocket
+        const ws = new WebSocket('ws://' + window.location.host + '/ws/pong/');
+
+        ws.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            const msg = data.message;
+
+            // Aktualizacja pozycji z serwera
+            if (msg.leftPaddleY !== undefined) leftPaddleY = msg.leftPaddleY;
+            if (msg.rightPaddleY !== undefined) rightPaddleY = msg.rightPaddleY;
+            if (msg.ballX !== undefined) ballX = msg.ballX;
+            if (msg.ballY !== undefined) ballY = msg.ballY;
+        };
+
+        function drawRect(x, y, w, h, color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, w, h);
+        }
+
+        function drawCircle(x, y, r, color) {
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2, false);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function gameLoop() {
+            // Sterowanie paletkami lokalnie, wysyłamy na serwer
+            if (keys['w'] && leftPaddleY > 0) {
+                leftPaddleY -= paddleSpeed;
+            }
+            if (keys['s'] && leftPaddleY < canvas.height - paddleHeight) {
+                leftPaddleY += paddleSpeed;
+            }
+            if (keys['ArrowUp'] && rightPaddleY > 0) {
+                rightPaddleY -= paddleSpeed;
+            }
+            if (keys['ArrowDown'] && rightPaddleY < canvas.height - paddleHeight) {
+                rightPaddleY += paddleSpeed;
+            }
+
+            // Wysyłamy pozycję do serwera
+            ws.send(JSON.stringify({
+                'message': {
+                    leftPaddleY: leftPaddleY,
+                    rightPaddleY: rightPaddleY,
+                    ballX: ballX,
+                    ballY: ballY
+                }
+            }));
+
+            // Rysujemy
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawRect(0, leftPaddleY, paddleWidth, paddleHeight, 'white');
+            drawRect(canvas.width - paddleWidth, rightPaddleY, paddleWidth, paddleHeight, 'white');
+            drawCircle(ballX, ballY, ballRadius, 'white');
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        gameLoop();
+    </script>
+</body>
+</html>
